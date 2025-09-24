@@ -1,0 +1,23 @@
+# This file tells Python which tools and libraries are needed to run this automation framework. 
+
+
+# Selenium WebDriver for browser automation
+selenium
+
+# Pytest is the main test runner
+pytest
+
+# Generates HTML test reports
+pytest-html
+
+# Run tests in parallel (speeds up execution)
+pytest-xdist
+
+# Advanced reporting with Allure
+allure-pytest
+
+# Load environment variables from .env file
+python-dotenv
+
+# Read/write Excel test data
+openpyxl
