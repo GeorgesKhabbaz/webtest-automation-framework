@@ -6,6 +6,7 @@ Includes:
 - Logging
 - Screenshot capture on failure
 - Parametrized test data from Excel
+- Pytest-html report integration
 """
 
 import os
@@ -20,7 +21,7 @@ from utilities.utils import setup_logger, take_screenshot, read_excel
 # Fixtures
 # ----------------------------
 @pytest.fixture(scope="function")
-def browser(request):
+def browser(request): # pylint: disable=W0613
     """Initialize browser before each test and quit after"""
     browser_type = config.get("browser", "chrome")
     if browser_type.lower() == "chrome":
@@ -32,26 +33,31 @@ def browser(request):
 
     driver.maximize_window()
 
-    # Yield driver to the test
     yield driver
-
-    # Capture screenshot on failure
-    if request.node.rep_call.failed:
-        test_name = request.node.name
-        take_screenshot(driver, test_name)
 
     driver.quit()
 
 
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+# ----------------------------
+# Pytest hook for screenshots in HTML report
+# ----------------------------
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call): # pylint: disable=W0613
-    """
-    Hook to detect test status (pass/fail).
-    Attaches report object to each test item so we can use it in fixtures.
-    """
+    """Attach screenshot to pytest-html report on test failure"""
     outcome = yield
     rep = outcome.get_result()
+
     setattr(item, "rep_" + rep.when, rep)
+
+    if rep.when == "call" and rep.failed:
+        driver = item.funcargs.get("browser")
+        if driver:
+            screenshot_path = take_screenshot(driver, item.name)
+            if "pytest_html" in item.config.pluginmanager.list_name_plugin():
+                extra = getattr(rep, "extra", [])
+                from pytest_html import extras # pylint: disable=C0415
+                extra.append(extras.image(screenshot_path))
+                rep.extra = extra
 
 
 # ----------------------------
@@ -70,18 +76,13 @@ logger = setup_logger("login_tests")
 # ----------------------------
 @pytest.mark.parametrize("data", login_data)
 def test_valid_login(browser, data):  # pylint: disable=W0621
-    """
-    Example test for successful login with Excel data
-    """
+    """Example test for successful login with Excel data"""
     driver = browser
     base_url = config.get("base_url", "https://example.com/login")
     driver.get(base_url)
     logger.info("Navigating to %s", base_url)
 
-    # Create LoginPage instance
     login_page = LoginPage(driver)
-
-    # Perform login actions
     login_page.enter_username(data["username"])
     login_page.enter_password(data["password"])
     login_page.click_login()
