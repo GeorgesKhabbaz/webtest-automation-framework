@@ -56,9 +56,9 @@ class BasePage:
             return element.text
         return ""
 
-    def is_visible(self, locator):
+    def is_element_visible(self, locator):
         """
-        Check if element is visible.
+        Check if element is visible. Returns the element if visible, else False.
         """
         try:
             return WebDriverWait(self.driver, self.timeout).until(
