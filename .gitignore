@@ -1,3 +1,26 @@
-# Python cache
+# Python compiled files
 __pycache__/
-*.pyc
+*.py[cod]
+
+# Virtual environments
+venv/
+.env
+
+# Logs and reports
+logs/
+reports/
+screenshots/
+
+# IDE files (VS Code, PyCharm)
+.vscode/
+*.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Ignore YAML secrets if you add sensitive data later
+configfiles/*.yaml
+
+# Optional: ignore Excel test data if it contains sensitive info
+testdata/*.xlsx
