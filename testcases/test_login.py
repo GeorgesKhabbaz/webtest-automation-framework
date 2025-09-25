@@ -4,12 +4,12 @@ Contains test cases for the Login functionality using Pytest and Page Object Mod
 """
 
 import pytest
-from pages.login_page import LoginPage
 from selenium import webdriver
+from pages.login_page import LoginPage
 from configfiles.config import config  # if you store URLs, browser type, etc.
 
 @pytest.fixture(scope="function")
-def setup_browser():
+def browser():
     """Initialize browser and quit after test"""
     browser_type = config.get("browser", "chrome")  # default to Chrome
     if browser_type.lower() == "chrome":
@@ -23,9 +23,9 @@ def setup_browser():
     yield driver
     driver.quit()
 
-def test_valid_login(setup_browser):
+def test_valid_login(browser): # pylint: disable=W0621
     """Example test for successful login"""
-    driver = setup_browser
+    driver = browser
     driver.get(config.get("base_url", "https://example.com/login"))  # placeholder URL
 
     login_page = LoginPage(driver)
